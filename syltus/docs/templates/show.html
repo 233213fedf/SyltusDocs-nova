@@ -1,0 +1,78 @@
+{% extends "bootstrap/base.html" %}
+
+{% load static %}
+{% load martortags %}
+
+{% block title %}浏览 / {{title}} :: SyltusDocs{% endblock %}
+
+{% block css %}
+  <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+  <link href="{% static 'martor/css/martor.bootstrap.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div calss="container">
+            <ul class="row list-group list-group-horizontal">
+                <li class="col-sm-6 list-group-item" align="center">{% if prev %}<a href="/show/{{prev.id}}">< {{prev.title}}</a>{% else %}第一篇文章{% endif %}</li>
+                <li class="col-sm-6 list-group-item" align="center">{% if next %}<a href="/show/{{next.id}}">{{next.title}} ></a>{% else %}最后一篇文章{% endif %}</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">{{ title }}</h4>
+                {% if author %}<p class="card-text">作者：{{ author }}</p>{% endif %}
+                <p class="card-text">分类：<a href="/list/?cat={{column.cat.id}}">{{ column.cat }}</a></p>
+                <p class="card-text">期次：<a href="/list/?issue={{issue.id}}">{{ issue.year }}-{{ issue.number }}</a></p>
+                <p class="card-text">板块：<a href="/list/?issue={{issue.id}}&col={{column.id}}">{{ column }}</a></p>
+                <p class="card-text">上传时间：{{ pub_date }}</p>
+            </div>
+        </div><br>
+        <div class="card">
+            <div class="card-header">附件</div>
+            {% if attach %}
+                <div class="row">
+                {% for con in attach %}
+                    <div class="col-sm-2">
+                        <img src="{{ con.file.url }}" class="img-thumbnail" data-bs-toggle="tooltip" title="{{con.title}}" style="width:150px;height:auto;">
+                    </div>
+                {% endfor %}
+                </div>
+            </ul>
+            {% else %}
+                <div class="container"><p>无</p></div>
+            {% endif %}
+        </div><br>
+        {% if description %}
+        <div class="alert alert-info">{{ description|safe_markdown }}</div>
+        {% endif %}<br>
+        {{ content|safe_markdown }}
+        {% if extra %}
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header">
+                    <a class="btn" data-bs-toggle="collapse" href="#extra">查看隐藏内容</a>
+                </div>
+                <div id="extra" class="collapse" data-bs-target="#accordion">
+                    <div class="card-body">
+                        {{ extra|safe_markdown }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
+    <script>
+    $('.martor-preview pre').each(function(i, block){
+        hljs.highlightBlock(block);
+    });
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+    </script>
+{% endblock %}

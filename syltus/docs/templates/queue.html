@@ -1,0 +1,96 @@
+{% extends "bootstrap/base.html" %}
+{% load static %}
+{% block title %}查询 :: SyltusDocs{% endblock %}
+{% block css %}
+  <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+  <link href="{% static 'martor/css/martor.bootstrap.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">查询</div><div class="card-body">
+                <form action="{% url 'docs:list' %}" method="get">
+                    <div class="row">
+                        <div class="col">
+                            <label for="cat" class="form-label">分类：</label>
+                            <select class="form-select form-select-sm" name="cat">
+                                <option value="">---</option>
+                        {% for c in cat_list %}
+                                <option value="{{c.id}}" {% if c.id == cat %}selected{% endif %}>{{c.title}}</option>
+                        {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="issue" class="form-label">期次：</label>
+                            <select class="form-select form-select-sm" name="issue">
+                                <option value="">---</option>
+                            {% for c in issue_list %}
+                                <option value="{{c.id}}" {% if c.id == issue %}selected{% endif %}>{{c}}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="col" class="form-label">板块：</label>
+                            <select class="form-select form-select-sm" name="col">
+                                <option value="">---</option>
+                            {% for c in col_list %}
+                                <option value="{{c.id}}" {% if c.id == col %}selected{% endif %}>{{c.title}}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: 1em;">
+                        <div class="col">
+                            <label for="title_contains" class="form-label">标题包含：</label>
+                            <input type="text" name="title_contains" class="form-control" {% if title_contains %}value="{{title_contains}}"{% endif %}>
+                        </div><div class="col">
+                            <label for="con_contains" class="form-label">内容包含：</label>
+                            <input type="text" name="con_contains" class="form-control" {% if con_contains %}value="{{con_contains}}"{% endif %}>
+                        </div>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </form>
+            </div>
+        </div><br>
+    {% if not_empty %}
+        {% if current_page %}
+        <div class="card">
+            <div class="card-header">已查询到 {{con_count}} 个条目</div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for con in current_page %}
+                    <a href="/show/{{ con.id }}/" class="list-group-item list-group-item-action">{{ con.title }} <span class="badge rounded-pill bg-primary">{{ con.col.cat.title }}</span> <span class="badge rounded-pill bg-secondary">{{ con.issue.year }}-{{ con.issue.number }}</span> <span class="badge rounded-pill bg-warning">{{ con.col.title }}</span> <span class="badge rounded-pill bg-info">{{ con.author }}</span> </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card-footer">
+                <ul class="pagination justify-content-center">
+                    {% if has_previous %}<li class="page-item"><a class="page-link" href="{% url 'docs:list-arg' prev_num %}?cat={{cat}}&col={{col}}&issue={{issue}}&title_contains={{title_contains}}&con_contains={{con_contains}}">上一页</a></li>{% endif %}
+                    {% if total_pages < 10 %}
+                        {% for i in page_range %}<li class="page-item{% if pagenum == i %} active{% endif %}"><a class="page-link" href="{% url 'docs:list-arg' i %}?cat={{cat}}&col={{col}}&issue={{issue}}&title_contains={{title_contains}}&con_contains={{con_contains}}">{{i}}</a></li>{% endfor %}
+                    {% else %}
+                    <li class="page-item{% if pagenum == i %} active{% endif %}"><a class="page-link" href="{% url 'docs:list-arg' 1 %}?cat={{cat}}&col={{col}}&issue={{issue}}&title_contains={{title_contains}}&con_contains={{con_contains}}">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">...</a></li>
+                        {% if pagenum >= 2 and pagenum <= total_pages|add:-2 %}
+                    <li class="page-item{% if pagenum == i %} active{% endif %}"><a class="page-link" href="{% url 'docs:list-arg' pagenum %}?cat={{cat}}&col={{col}}&issue={{issue}}&title_contains={{title_contains}}&con_contains={{con_contains}}">{{pagenum}}</a></li>
+                    <li class="page-item"><a class="page-link" href="#">...</a></li>
+                        {% endif %}
+                    <li class="page-item{% if pagenum == i %} active{% endif %}"><a class="page-link" href="{% url 'docs:list-arg' total_pages %}?cat={{cat}}&col={{col}}&issue={{issue}}&title_contains={{title_contains}}&con_contains={{con_contains}}">{{total_pages}}</a></li>
+                    {% endif %}
+                    {% if has_next %}<li class="page-item"><a class="page-link" href="{% url 'docs:list-arg' next_num %}?cat={{cat}}&col={{col}}&issue={{issue}}&title_contains={{title_contains}}&con_contains={{con_contains}}">下一页</a></li>{% endif %}
+                </ul>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            未找到任何符合条件的条目。
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-danger">
+            未输入条件。
+        </div>
+    {% endif %}
+    </div>
+{% endblock %}
